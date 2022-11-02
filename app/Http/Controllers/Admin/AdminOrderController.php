@@ -37,8 +37,9 @@ class AdminOrderController extends Controller
 //                                    ->orderBy('id','desc')
 //                                    ->get();
             $orders = Order::query()
-                                    ->orderBy('id','desc')
-                                    ->get();
+                            ->with('user')
+                            ->orderBy('id','desc')
+                            ->get();
 
             $order_count = count($orders);
 

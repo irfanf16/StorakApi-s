@@ -175,7 +175,7 @@ class AdminChildcategoriesController extends Controller
             // $imageSave   = $imageResize->save($imagePath.'/'.$imageName,60);
 
             // INSERT THIS IMAGE INTO FORMDATA ARRAY
-            $imageName = self::uploadFile($request->image, 'public', 'childcategories/image');
+            $imageName = self::uploadFile($request->image, 'public', 'childcategories/image', true);
             $formData['image'] = $imageName;
         }
 
@@ -340,7 +340,7 @@ class AdminChildcategoriesController extends Controller
             // $imageSave   = $imageResize->save($imagePath.'/'.$imageName,60);
 
             // INSERT THIS IMAGE INTO FORMDATA ARRAY
-            $imageName = self::uploadFile($request->image, 'public', 'childcategories/image');
+            $imageName = self::uploadFile($request->image, 'public', 'childcategories/image', true);
 
             $formData['image'] = $imageName;
         }

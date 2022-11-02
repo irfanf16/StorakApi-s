@@ -47,7 +47,7 @@ class VendorOrdersController extends Controller
             $orders_status = OrderStatus::all();
 
             foreach ($orders_status as $status) {
-                
+
                 $listing =  $orders->filter(function ($orders) use ($status){
                     return $orders->order_status_id == $status->id;
                 });
@@ -82,20 +82,20 @@ class VendorOrdersController extends Controller
     */
     public function create()
     {
-        
+
     }
-    
+
 
 
     /*
     |==================================================================
     | Store a Newly Created Order In the Database
     |==================================================================
-    */ 
+    */
     public function store(Request $request)
-    {   
-        
-        
+    {
+
+
     }
 
 
@@ -145,8 +145,8 @@ class VendorOrdersController extends Controller
                 'status'=> 200,
                 'order' => $order
             ]);
-          
-        } 
+
+        }
 
         catch (\Exception $e) {
             return response()->json([
@@ -154,7 +154,7 @@ class VendorOrdersController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
-        
+
     }
 
 
@@ -169,7 +169,7 @@ class VendorOrdersController extends Controller
         try {
             $orders = OrderPackage::where([
                                             'store_id' => \Auth::user()->store->id ?? 0,
-                                            'order_status_id' => $id 
+                                            'order_status_id' => $id
                                         ])
                                     ->with('orderDetail')
                                     ->with('storeDetail')
@@ -177,10 +177,10 @@ class VendorOrdersController extends Controller
                                     ->with('orderStatusDetail')
                                     ->with('packageItems.productDetail')
                                     ->orderBy('id','desc')
-                                    ->get(); 
+                                    ->get();
 
             $order_count = count($orders);
-            
+
             return response()->json([
                 'status'     => 200,
                 'orders'     => $orders,
@@ -199,25 +199,25 @@ class VendorOrdersController extends Controller
 
 
 
-    /* 
+    /*
     |==================================================================
     | Edit Specific Order In Vendor Panel
     |==================================================================
     */
     public function edit($id)
     {
-       
+
     }
 
 
 
-    /* 
+    /*
     |==================================================================
     | PROVIDE ORDER-STATUS LISTING FOR ORDER UPDATE BY VENDOR
     |==================================================================
     */
     public function orderStatusListing(Request $request)
-    {   
+    {
         try {
             $order_status    = OrderPackage::where('id',$request->order_id)->first();
             $order_status_id = $order_status->order_status_id;
@@ -233,8 +233,8 @@ class VendorOrdersController extends Controller
                 case 'Accepted':
                     $order_status = OrderStatus::where('status_for','vendors')
                                                 ->where('status', '!=', 'Pending')
-                                                ->where('status', '!=', 'Rejected')
-                                                ->take(2)
+//                                                ->where('status', '!=', 'Rejected')
+                                                ->take(3)
                                                 ->get();
                     break;
 
@@ -244,11 +244,21 @@ class VendorOrdersController extends Controller
                                                 ->get();
                     break;
 
+                case 'Cancelled':
+                    $order_status = OrderStatus::where('status', '=', 'Cancelled')
+                        ->take(1)
+                        ->get();
+                    break;
+
                 case 'Shipped':
-                        $order_status = OrderStatus::where('status_for','vendors')
+                        $order_status_a = OrderStatus::where('status_for','vendors')
                                                     ->where('id', '>=', $order_status->order_status_id)
                                                     ->take(3)
-                                                    ->get();
+                                                    ->get()->toArray();
+                    $order_status_b = OrderStatus::where('status', '=', 'Rejected')
+                        ->take(1)
+                        ->get()->toArray();
+                    $order_status=array_merge($order_status_a,$order_status_b);
                         break;
 
                 case 'Delivered':
@@ -264,10 +274,14 @@ class VendorOrdersController extends Controller
                         break;
 
                 default:
-                    $order_status = OrderStatus::where('status_for','vendors')
+                    $order_status_a = OrderStatus::where('status_for','vendors')
                                                 ->where('id', '>=', $order_status->order_status_id)
                                                 ->take(2)
-                                                ->get();
+                                                ->get()->toArray();
+                    $order_status_b = OrderStatus::where('status', '=', 'Rejected')
+                        ->take(1)
+                        ->get()->toArray();
+                    $order_status=array_merge($order_status_a,$order_status_b);
                     break;
             }
 
@@ -277,27 +291,27 @@ class VendorOrdersController extends Controller
             ]);
 
         }
-        
+
         catch (\Exception $e) {
-            
+
             DB::rollback();
             return response()->json([
                 "status"  => 100,
                 "message" => $e->getMessage(),
-            ]); 
+            ]);
         }
 
     }
 
 
 
-    /* 
+    /*
     |==========================================================
     | ORDER-STATUS BY UPDATED BY VENDOR
     |==========================================================
     */
     public function updateOrderStatus(Request $request, $id)
-    {   
+    {
         // FIND BUYER-EMAIL (GOT THIS USING BelongsToThrough Relation)
         $buyer_email = OrderPackage::where('id',$id)->first()->user->email;
 
@@ -306,10 +320,10 @@ class VendorOrdersController extends Controller
             // UPDATE ORDER-PACKAGE STATUS
             OrderPackage::where('id', $id)
                         ->update(['order_status_id' => $request->order_status_id]);
-            
+
             // STORE PACKAGE-HISTORY
             $is_already_existing = OrderPackageHistory::where([
-                                                        'order_package_id' => $id, 
+                                                        'order_package_id' => $id,
                                                         'order_status_id'  => $request->order_status_id
                                                       ])->first();
 
@@ -322,28 +336,28 @@ class VendorOrdersController extends Controller
 
                 // FIND PACKAGE-DETAILS
                 $package_details = OrderPackage::where('id',$id)->first();
-                
+
                 // SEND EMAIL TO BUYER -- ON PACKAGE STATUS CHANGE
                 // Mail::to('dev.shahzadmahota@gmail.com')->send(new SendOrderStatusEmail($package_details)); // Testing
                 Mail::to($buyer_email)->send(new SendOrderStatusEmail($package_details)); // Origional
             }
-            
+
 
             DB::commit();
             return response()->json([
                 "status"          => 200,
                 "message"         => "Order Status is Updated Successfully",
             ]);
-           
+
         }
-        
+
         catch (\Exception $e) {
-            
+
             DB::rollback();
             return response()->json([
                 "status"  => 100,
                 "message" => $e->getMessage(),
-            ]); 
+            ]);
         }
 
     }
@@ -373,7 +387,7 @@ class VendorOrdersController extends Controller
     */
     public function destroy($id)
     {
-        
+
     }
 
 

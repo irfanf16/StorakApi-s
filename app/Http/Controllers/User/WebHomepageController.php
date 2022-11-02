@@ -87,9 +87,12 @@ class WebHomepageController extends Controller
     public function recommendedProducts()
     {
         try {
-            $recommended_products = Product::with('firstVariant:id,price,special_price,product_id')
+            $recommended_products = Product::with('firstVariant')
                 ->with('brand:id,name,name_ar,slug,logo_image,cover_image')
                 ->with('category')
+                ->whereHas('firstVariant',function ($query){
+                    $query->where('quantity','>=',1)->where('availability',1);
+                })
                 ->where('status', 1)
                 ->whereRelation('store','is_verified','=',1)
                 ->whereRelation('store','status','=',1)
@@ -161,9 +164,12 @@ class WebHomepageController extends Controller
     public function featuredProducts()
     {
         try {
-            $featured_products = Product::with('firstVariant:id,price,special_price,product_id')
+            $featured_products = Product::with('firstVariant')
                 ->with('brand:id,name,name_ar,slug')
                 ->with('category')
+                ->whereHas('firstVariant',function ($query){
+                    $query->where('quantity','>=',1)->where('availability',1);
+                })
                 ->where(['status' => 1, 'featured' => 1])
                 ->whereRelation('store','is_verified','=',1)
                 ->whereRelation('store','status','=',1)

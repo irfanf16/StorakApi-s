@@ -35,6 +35,49 @@ class AdminProductQuestionsController extends Controller
         ]);
     }
 
+    public function questionsList(Request $request){
+        // try {
+
+            // if ($request->ajaxRequest) {
+
+                $questions = ProductQuestion::with('productDetail:id,name,slug', 'userDetail')->whereHas('productDetail')
+                    ->when($request->has('search') && $request->filled('search'), function ($query) use ($request) {
+                        $query->where('customer_question', 'LIKE', '%' . $request->search . "%");
+                        $query->orWhere('vendor_reply', 'LIKE', '%' . $request->search . "%");
+                    })
+                    ->when($request->has('from_date') && $request->filled('from_date'), function($query) use($request){
+                        $query->where('created_at' , '>', $request->from_date);
+                    })
+                    ->when($request->has('to_date') && $request->filled('to_date'), function($query) use($request){
+                        $query->where('created_at' , '<', $request->to_date);
+                    })
+                    ->when($request->has('status') && $request->filled('status'), function($query) use($request){
+                        $query->where('status' , '=' , $request->status);
+                    })
+                    ->when($request->has('questions') && $request->questions == 0, function ($query) use ($request) {
+                        $query->where('vendor_reply', '=', null);
+                    })
+                    ->when($request->has('questions') && $request->questions == 1, function ($query) use ($request) {
+                        $query->where('vendor_reply', '!=', null);
+                    })
+                    ->paginate($request->datatable_length ?? 10);
+
+                    $productquestions = Productquestion::all();
+                    $answer_questions = $productquestions->where('vendor_reply', '!=', null)->count();
+                    $pending_questions = $productquestions->where('vendor_reply', '=', null)->count();
+                    $active_questions = $productquestions->where('status', 1)->count();
+                    $inactive_questions = $productquestions->where('status', 0)->count();
+                return response()->json([
+                    'status' => 200,
+                    'questions' => $questions,
+                    'total_questions' => count($productquestions),
+                    'answer_questions' => $answer_questions,
+                    'pending_questions' => $pending_questions,
+                    'active_questions' => $active_questions,
+                    'inactive_questions' => $inactive_questions,
+                ]);
+            // }
+    }
 
 
     /*
@@ -80,7 +123,7 @@ class AdminProductQuestionsController extends Controller
     */
     public function edit($pid, $qid)
     {
-        $question = ProductsQuestion::where('id',$qid)->first();
+        $question = ProductQuestion::where('id',$qid)->first();
 
         return response()->json([
             'status'   => 200,
@@ -115,7 +158,7 @@ class AdminProductQuestionsController extends Controller
             'status'     => $request->status == "on" ? 1 : 0,
         ];
 
-        $isUpdated = ProductsQuestion::where('id', $qid)->update($formData);
+        $isUpdated = ProductQuestion::where('id', $qid)->update($formData);
 
         if ($isUpdated) {
             return response()->json([
@@ -142,7 +185,7 @@ class AdminProductQuestionsController extends Controller
     */
     public function destroy($pid, $qid)
     {
-        $isDeleted = ProductsQuestion::where('id',$qid)->delete();
+        $isDeleted = ProductQuestion::where('id',$qid)->delete();
 
         if ($isDeleted) {
             return response()->json([
@@ -157,5 +200,16 @@ class AdminProductQuestionsController extends Controller
 
     }
 
-
+    public function changeStatus(Request $request)
+    {
+        try {
+            ProductQuestion::where('id', $request->question_id)->update(['status' => $request->status]);
+            return response()->json(['status' => 200, 'success' => 'Status changed successfully.', 'request' => $request->all()]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 100,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
 }

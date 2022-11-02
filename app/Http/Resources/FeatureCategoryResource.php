@@ -23,6 +23,7 @@ class FeatureCategoryResource extends JsonResource
             'logo_image'=>$this['logo_image'],
             'mobile_image'=>$this['mobile_image'],
             'model_type'=>'Category',
+            'products_count'=>$this['products_count'],
             'subcategories'=>SubCategoryResource::collection($this['subcategories'])
         ];
     }

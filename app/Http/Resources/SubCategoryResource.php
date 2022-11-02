@@ -22,6 +22,8 @@ class SubCategoryResource extends JsonResource
             'title' => $lang == 'ar' ? $this['title_ar'] : $this['title'],
             'keyword' => $lang == 'ar' ? $this['title_ar'] : $this['title'],
             'model_type' => 'SubCategory',
+            'products_count'=>$this['products_count'],
+
         ];
     }
 }

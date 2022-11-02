@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
+use App\Models\StockHistory;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\DB;
@@ -209,11 +210,29 @@ class AdminProductVariantsController extends Controller
                 'errors' => $validator->messages()->all(),
             ]);
         }
+        if ($request->has('price')){
+            $addStock = ProductVariant::where('id', $vid)
+                ->update([
+                    'quantity'    => DB::raw("quantity+$request->add_stock"),
+                    'price'    => $request->price,
+                    'special_price'    => $request->special_price,
+                ]);
+        }else{
+            $addStock = ProductVariant::where('id', $vid)
+                ->update([
+                    'quantity'    => DB::raw("quantity+$request->add_stock"),
+                ]);
+        }
+        $addStock = ProductVariant::find($vid);
 
-        $addStock = ProductVariant::where('id', $vid)
-                                    ->update([
-                                        'quantity'    => DB::raw("quantity+$request->add_stock"),
-                                    ]);
+        StockHistory::create([
+            'product_variant_id'=>$addStock->id,
+            'price'=>$addStock->price,
+            'special_price'=>$addStock->special_price,
+            'stock'=>$request->add_stock,
+            'added_by'=>'Storak Admin',
+        ]);
+
 
         // $addStock = ProductsVariant::where('id',$vid)->increment('total_stock', $request->add_stock);
         // $addStock = ProductsVariant::where('id',$vid)->increment('remaining_stock', $request->add_stock);

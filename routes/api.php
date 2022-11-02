@@ -1,11 +1,8 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminCommissionController;
-use App\Http\Controllers\AppSettingController;
+
 use App\Http\Controllers\User\SubscriberController;
-use App\Http\Controllers\Vendor\VendorCommissionController;
-use App\Http\Controllers\Vendor\VendorStatisticController;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Route;
 
 // JWT CONTROLLER
@@ -19,61 +16,13 @@ use App\Http\Controllers\ActivityController;
 
 
 //  ADMIN CONTROLLERS
-use App\Http\Controllers\Admin\AdminOrderController;
-use App\Http\Controllers\Admin\AdminProductsController;
-use App\Http\Controllers\Admin\AdminAjaxRequestsController;
-use App\Http\Controllers\Admin\AdminAppSettingController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\AdminCategoriesController;
-use App\Http\Controllers\Admin\AdminSubcategoriesController;
-use App\Http\Controllers\Admin\AdminChildcategoriesController;
-use App\Http\Controllers\Admin\AdminVendorsController;
-use App\Http\Controllers\Admin\AdminBuyersController;
-use App\Http\Controllers\Admin\AdminVendorStoresController;
 
-use App\Http\Controllers\Admin\AdminProductReviewsController;
-use App\Http\Controllers\Admin\AdminProductQuestionsController;
-
-use App\Http\Controllers\Admin\AdminBrandsController;
-use App\Http\Controllers\Admin\AdminAttributesController;
-use App\Http\Controllers\Admin\AdminVariantsController;
-
-use App\Http\Controllers\Admin\AdminPartnersController;
-use App\Http\Controllers\Admin\AdminCitiesController;
-
-use App\Http\Controllers\Admin\AdminWebsiteBannersController;
-use App\Http\Controllers\Admin\AdminMobileCoversController;
-
-use App\Http\Controllers\Admin\AdminBusinessDocumentsController;
-use App\Http\Controllers\Admin\AdminBusinessDocumentInputsController;
-use App\Http\Controllers\Admin\AdminCustomerController;
-use App\Http\Controllers\Admin\AdminCustomerStoresController;
-use App\Http\Controllers\Admin\AdminKeysController;
-use App\Http\Controllers\MassuploadController;
 use App\Http\Controllers\SearchController;
-use App\Http\Controllers\Admin\AdminProductVariantsController;
-use App\Http\Controllers\Admin\AdminSocialLinkController;
-use App\Http\Controllers\Admin\AdminSubscribersController;
-use App\Http\Controllers\Admin\AdminContactsController;
+
 
 // VENDOR CONTROLLERS
 use App\Http\Controllers\Vendor\VendorAccountVerificationsController;
 use App\Http\Controllers\Vendor\VendorCustomMessageController;
-
-use App\Http\Controllers\Vendor\VendorDashboardController;
-use App\Http\Controllers\Vendor\VendorProfileController;
-use App\Http\Controllers\Vendor\VendorProductsController;
-use App\Http\Controllers\Vendor\VendorOrdersController;
-use App\Http\Controllers\Vendor\VendorNotificationsController;
-use App\Http\Controllers\Vendor\VendorCouponsController;
-
-use App\Http\Controllers\Vendor\VendorProductReviewsController;
-use App\Http\Controllers\Vendor\VendorProductQuestionsController;
-
-use App\Http\Controllers\Vendor\VendorCategoriesController;
-use App\Http\Controllers\Vendor\VendorBrandsController;
-use App\Http\Controllers\Vendor\VendorProductsVariantsController;
-
 
 // SHIPPING-COMPANY CONTROLLERS
 use App\Http\Controllers\Shipping\ShippingDeliverRequestsController;
@@ -132,7 +81,7 @@ Route::post('guest/orders', [OrdersController::class, 'placeGuestOrder']);
 | JWT AUTH API ROUTES
 |=========================================================
 */
-Route::group(['middleware' => 'api',], function () {
+Route::group([], function () {
 
     // Activity Log
     Route::resource('/activity-log', ActivityController::class);
@@ -168,8 +117,8 @@ Route::group(['middleware' => 'api',], function () {
     Route::get('password/reset/email/confirm-email-code/{code}', [VendorAccountVerificationsController::class, 'matchEmailResetCode']);
     Route::post('password/reset/email/update-password', [VendorAccountVerificationsController::class, 'resetVendorPasswordViaEmail']);
 //    Subscriber
-    Route::post('subscribe',[SubscriberController::class,'subscribe']);
-    Route::post('contact/us',[SubscriberController::class,'constantUs']);
+    Route::post('subscribe', [SubscriberController::class, 'subscribe']);
+    Route::post('contact/us', [SubscriberController::class, 'constantUs']);
 });
 
 
@@ -186,351 +135,6 @@ Route::group(['prefix' => 'email', 'middleware' => []], function () {
 
 // CUSTOM-MESSAGE
 Route::resource('custom-messages', VendorCustomMessageController::class);
-
-
-/*
-|=========================================================
-| AJAX API ROUTES
-|=========================================================
-*/
-Route::group(['prefix' => 'admin/ajax/', 'middleware' => []], function () {
-
-    Route::get('categories', [AdminAjaxRequestsController::class, 'categoriesList']);
-    Route::get('subcategories', [AdminAjaxRequestsController::class, 'subcategoriesList']);
-    Route::get('childcategories', [AdminAjaxRequestsController::class, 'childcategoriesList']);
-    Route::get('variants', [AdminAjaxRequestsController::class, 'variantsList']);
-    Route::get('multiple-subcategories', [AdminAjaxRequestsController::class, 'multipleSubCategories']);
-    Route::get('multiple-childcategories', [AdminAjaxRequestsController::class, 'multipleChildCategories']);
-});
-
-/*
-|=========================================================
-| STORAK-ADMIN API ROUTES
-|=========================================================
-*/
-Route::group(['prefix' => 'admin/', 'middleware' => ['isStorakAdmin']], function () {
-
-    // DASHBOARD
-    Route::get('dashboard', [AdminDashboardController::class, 'index']);
-
-    // CATEGORIES-MANAGEMENT
-    Route::prefix('categories')->group(function () {
-        Route::get('/archive', [AdminCategoriesController::class, 'showArchive']);
-        Route::post('/restore', [AdminCategoriesController::class, 'restoreCategory']);
-        Route::post('/order/update', [AdminCategoriesController::class, 'orderUpdate']);
-        Route::get('/{id}/subcategories', [AdminCategoriesController::class, 'subcategories']);
-        Route::get('/change/status', [AdminCategoriesController::class, 'changeStatus']);
-    });
-    Route::resource('categories', AdminCategoriesController::class);
-
-    Route::prefix('subcategories')->group(function () {
-        Route::get('/archive', [AdminSubcategoriesController::class, 'showArchive']);
-        Route::post('/restore', [AdminSubcategoriesController::class, 'restoreCategory']);
-        Route::post('/order/update', [AdminSubcategoriesController::class, 'orderUpdate']);
-        Route::get('/change/status', [AdminSubcategoriesController::class, 'changeStatus']);
-        Route::get('/count', [AdminSubcategoriesController::class, 'countSub']);
-
-        Route::get('/{id}/childcategories', [AdminSubCategoriesController::class, 'childcategories']);
-    });
-    Route::resource('subcategories', AdminSubcategoriesController::class);
-
-    Route::prefix('childcategories')->group(function () {
-        Route::get('childcategories/status/changes/{id}', [AdminAttributesController::class, 'statusChanged']);
-        Route::get('/archive', [AdminChildcategoriesController::class, 'showArchive']);
-        Route::post('/restore', [AdminChildcategoriesController::class, 'restoreCategory']);
-        Route::post('/order/update', [AdminChildcategoriesController::class, 'orderUpdate']);
-    });
-    Route::get('/child/change/status', [AdminChildcategoriesController::class, 'changeStatus']);
-    Route::get('child/count', [AdminChildcategoriesController::class, 'countChild']);
-    Route::resource('childcategories', AdminChildcategoriesController::class);
-
-    //CUSTOMER-MANAGEMENT
-
-    Route::get('customer/profiles', [AdminCustomerController::class, 'allCustomers']);
-    Route::get('customer/detail/{id}', [AdminCustomerController::class, 'show']);
-    Route::get('/customer/status', [AdminCustomerController::class, 'changeStatus']);
-
-
-    // VENDORS-MANAGEMENT
-    Route::group(['prefix' => 'vendor/', 'middleware' => []],
-        function () {
-            Route::get('profiles', [AdminVendorsController::class, 'allVendors']);
-            Route::get('profiles/incomplete', [AdminVendorsController::class, 'incompleteVendors']);
-            Route::get('profiles/under-review', [AdminVendorsController::class, 'underReviewVendors']);
-            Route::get('profiles/approved', [AdminVendorsController::class, 'approvedVendors']);
-            Route::get('profiles/rejected', [AdminVendorsController::class, 'rejectedVendors']);
-
-            // PROFILE DETAILS
-            Route::get('profile/incomplete/{id}', [AdminVendorsController::class, 'incompleteVendorDetail']);
-            Route::get('profile/detail/{id}', [AdminVendorsController::class, 'vendorProfileDetail']);
-
-            // UPDATE VENDOR STATUS
-            Route::post('profile/update-status/{id}', [AdminVendorsController::class, 'updateVendorStatus']);
-        });
-
-
-    Route::get('/vendor/store/status', [AdminVendorStoresController::class, 'changeStatus']);
-    Route::resource('stores/vendor', AdminVendorStoresController::class);
-    Route::resource('stores/customer', AdminCustomerStoresController::class);
-    Route::get('/customer/collections/{id}', [AdminCustomerStoresController::class, 'collections']);
-    Route::get('/customer/store/status', [AdminCustomerStoresController::class, 'changeStatus']);
-    Route::get('/collection/visibility', [AdminCustomerStoresController::class, 'collectionVisibility']);
-    Route::resource('buyers', AdminBuyersController::class);
-
-    Route::prefix('brands')->group(function () {
-        Route::get('/archive', [AdminBrandsController::class, 'showArchive']);
-        Route::post('/restore', [AdminBrandsController::class, 'restoreCategory']);
-        Route::get('/count', [AdminBrandsController::class, 'countBrand']);
-    });
-    Route::get('/brand/change/status', [AdminBrandsController::class, 'changeStatus']);
-    Route::resource('brands', AdminBrandsController::class);
-
-    // Attribute
-    Route::resource('attributes', AdminAttributesController::class);
-    Route::get('/attr/count', [AdminAttributesController::class, 'countAttrib']);
-    Route::get('attribute/change/status', [AdminAttributesController::class, 'changeStatus']);
-
-    // keys
-    Route::resource('keys', AdminKeysController::class);
-    Route::get('key/change/status', [AdminKeysController::class, 'changeStatus']);
-
-    // PRODUCT MODULE
-    Route::resource('/product', AdminProductsController::class);
-    Route::get('/product/change/status', [AdminProductsController::class, 'changeStatus']);
-    Route::resource('variants', AdminVariantsController::class);
-    Route::resource('partners', AdminPartnersController::class);
-    Route::get('products/count', [AdminProductsController::class, 'countProduct']);
-    Route::get('/product/{id}/editTranslation', [AdminProductsController::class, 'editTranslation']);
-    Route::post('/product/{id}/updateTranslation', [AdminProductsController::class, 'updateTranslation']);
-
-    // PRODUCT VARIANTS
-    Route::get('products/{pid}/variants', [AdminProductVariantsController::class, 'index']);
-    Route::get('products/{pid}/variants/create', [AdminProductVariantsController::class, 'create']);
-    Route::post('products/{pid}/variants', [AdminProductVariantsController::class, 'store']);
-    Route::get('products/{pid}/variants/{vid}/edit', [AdminProductVariantsController::class, 'edit']);
-    Route::put('products/{pid}/variants/{vid}', [AdminProductVariantsController::class, 'update']);
-    Route::delete('products/{pid}/variants/{vid}', [AdminProductVariantsController::class, 'destroy']);
-    Route::post('products/{pid}/variants/{vid}/addstock', [AdminProductVariantsController::class, 'addStock']);
-
-
-    // PRODUCT RATINGS-AND-REVIEWS
-    Route::get('products/{id}/reviews', [AdminProductReviewsController::class, 'index']);
-    Route::post('products/reviews/filtered', [AdminProductReviewsController::class, 'filteredReviews']);
-    Route::get('products/review/{id}/detail', [AdminProductReviewsController::class, 'reviewDetail']);
-    Route::post('products/review/{id}/status', [AdminProductReviewsController::class, 'changeReviewStatus']);
-
-    // all reviews
-
-    Route::get('reviews', [AdminProductReviewsController::class, 'reviewsList']);
-
-
-
-    // PRODUCT QUESTIONS
-    Route::get('products/{pid}/questions', [AdminProductQuestionsController::class, 'index']);
-    Route::get('products/{pid}/questions/{qid}/edit', [AdminProductQuestionsController::class, 'edit']);
-    Route::put('products/{pid}/questions/{qid}', [AdminProductQuestionsController::class, 'update']);
-    Route::delete('products/{pid}/questions/{qid}', [AdminProductQuestionsController::class, 'destroy']);
-
-    // SETTINGS
-    Route::resource('cities', AdminCitiesController::class);
-
-    // WEBSITE BANNERS
-    Route::prefix('website/banners')->group(function () {
-        Route::post('/delete/multiple', [AdminWebsiteBannersController::class, 'deleteMultipleBanners']);
-        Route::get('/delete/all', [AdminWebsiteBannersController::class, 'deleteAllBanners']);
-        Route::get('/archive', [AdminWebsiteBannersController::class, 'showArchiveBanners']);
-        Route::post('/restore', [AdminWebsiteBannersController::class, 'restoreBanner']);
-        Route::post('/order/update', [AdminWebsiteBannersController::class, 'orderUpdate']);
-    });
-    Route::resource('website/banners', AdminWebsiteBannersController::class);
-
-
-    Route::resource('mobile/covers', AdminMobileCoversController::class);
-
-    // BUSINESS DOCUMENTS
-    Route::resource('business-documents', AdminBusinessDocumentsController::class);
-    Route::get('documents/with-inputs', [AdminBusinessDocumentsController::class, 'documentsWithInputs']);
-
-    Route::get('document/{did}/inputs', [AdminBusinessDocumentInputsController::class, 'index']);
-    Route::get('document/{did}/input/create', [AdminBusinessDocumentInputsController::class, 'create']);
-    Route::post('document/{did}/input', [AdminBusinessDocumentInputsController::class, 'store']);
-    Route::get('document/{did}/input/{id}/edit', [AdminBusinessDocumentInputsController::class, 'edit']);
-    Route::put('document/{did}/input/{id}', [AdminBusinessDocumentInputsController::class, 'update']);
-    Route::delete('document/{did}/input/{id}', [AdminBusinessDocumentInputsController::class, 'destroy']);
-
-
-    Route::post('massupload/product', [MassuploadController::class, 'store']);
-
-//    Orders
-//    Route::prefix('orders')->group(function (){
-//        Route::get('list',[AdminOrderController::class,'ordersList']);
-//        Route::get('detail/{id}',[AdminOrderController::class,'orderDetail']);
-//    });
-
-
-//    orders
-
-    Route::resource('order', AdminOrderController::class);
-    Route::get('order/status/{id}', [AdminOrderController::class, 'ordersByStatus']);
-    Route::post('order/status/listing', [AdminOrderController::class, 'orderStatusListing']);
-    Route::post('order/status/{id}', [AdminOrderController::class, 'updateOrderStatus']);
-    Route::get('order-invoice/{id}', [AdminOrderController::class, 'orderInvoice']);
-
-
-
-    Route::prefix('commissions')->group(function () {
-        Route::get('/', [AdminCommissionController::class, 'index'])->name('commissions');
-        Route::get('/applied', [AdminCommissionController::class, 'appliedCommissionSection'])->name('commissions.applied');
-    });
-
-    Route::get('/social', [AdminSocialLinkController::class, 'index']);
-    Route::post('/social/store', [AdminSocialLinkController::class, 'store']);
-    Route::get('/social/edit/{id}', [AdminSocialLinkController::class, 'edit']);
-    Route::post('/social/update/{id}', [AdminSocialLinkController::class, 'update']);
-    Route::delete('/social/delete/{id}', [AdminSocialLinkController::class, 'destroy']);
-
-    //Settings
-
-    Route::get('app/settings',[AdminAppSettingController::class,'index']);
-    Route::get('app/settings/edit/{id}',[AdminAppSettingController::class,'edit']);
-    Route::put('app/settings/update/{id}',[AdminAppSettingController::class,'update']);
-    Route::post('app/settings/status/{id}',[AdminAppSettingController::class,'changeStatus']);
-    Route::delete('app/settings/delete/{id}',[AdminAppSettingController::class,'destroy']);
-
-    //subscribers
-
-    Route::get('/subscribers', [AdminSubscribersController::class, 'index']);
-
-    //contacts
-
-    Route::get('/contacts', [AdminContactsController::class, 'index']);
-
-});
-
-
-/*
-|=========================================================
-| VENDOR API ROUTES
-|=========================================================
-*/
-Route::group(['prefix' => 'vendor/', 'middleware' => ['jwt.verify', 'isVendor']], function () {
-
-    // Vendor Account setting
-    Route::prefix('/account')->group(function () {
-        Route::patch('/{id}', [VendorProfileController::class, 'update_account']);
-
-    });
-
-    // Vendor Sub User Management
-    Route::prefix('/users')->group(function () {
-        Route::post('/', [UserManagementController::class, 'createUser']);
-        Route::patch('/{id}', [UserManagementController::class, 'updateUser']);
-        Route::get('/', [UserManagementController::class, 'listUser']);
-        Route::get('/{id}', [UserManagementController::class, 'findUser']);
-
-    });
-
-    Route::prefix('/subrole')->group(function () {
-        Route::post('/', [UserManagementController::class, 'createSubrole']);
-        Route::get('/', [UserManagementController::class, 'listSubrole']);
-        Route::get('/{id}', [UserManagementController::class, 'findSubrole']);
-        Route::patch('/{id}', [UserManagementController::class, 'updateSubrole']);
-
-        // set permission of subroles
-        Route::post('/permissions', [UserManagementController::class, 'createSubrolePermissions']);
-
-
-        // Assign role to Users
-        Route::post('/assign', [UserManagementController::class, 'assignSubrole']);
-
-    });
-
-    Route::prefix('module')->group(function () {
-        Route::get('/', [UserManagementController::class, 'listModules']);
-    });
-
-    // DASHBOARD
-    Route::get('dashboard', [VendorDashboardController::class, 'index']);
-
-    // VENDOR PROFILE
-    Route::get('profile/basic', [VendorProfileController::class, 'profileDetails']);
-    Route::post('profile/basic', [VendorProfileController::class, 'basicInfoUpdate']);
-    Route::post('profile/business', [VendorProfileController::class, 'businessInfoUpdate']);
-    Route::post('profile/business/documents', [VendorProfileController::class, 'businessDocumentsUpdate']);
-    Route::post('profile/store', [VendorProfileController::class, 'storeInfoUpdate']);
-    Route::post('profile/bank', [VendorProfileController::class, 'bankInfoUpdate']);
-    Route::post('profile/warehouse', [VendorProfileController::class, 'warehouseInfoUpdate']);
-    Route::post('profile/return', [VendorProfileController::class, 'returnInfoUpdate']);
-    Route::post('profile/review', [VendorProfileController::class, 'requestProfileApproval']);
-    Route::get('documents-with-inputs', [VendorProfileController::class, 'documentsWithInputs']);
-
-    // PREVIEW BUSINESS DOCUMENT
-    Route::get('doc/preview/{id}', [VendorProfileController::class, 'previewBusinessDocument']);
-
-    // Store
-    Route::get('store/getowner/{id}', [StoreController::class, 'getOwner']);
-
-    // PRODUCTS
-    Route::prefix('products')->group(function () {
-        Route::get('/list', [VendorProductsController::class, 'productList']);
-        Route::get('/variant/{id}', [VendorProductsController::class, 'variantDelete']);
-        Route::post('/variant/{id}/add-variant', [VendorProductsController::class, 'addNewVariant']);
-        Route::get('/{id}/edit/vendorTranslation', [VendorProductsController::class, 'editTranslation']);
-        Route::post('/{id}/update/vendorTranslation', [VendorProductsController::class, 'updateTranslation']);
-        Route::get('/change/status', [VendorProductsController::class, 'changeStatus']);
-
-    });
-    Route::resource('products', VendorProductsController::class);
-
-    Route::post('product/subcategories-brands', [VendorProductsController::class, 'subcategoriesAndBrands']);
-    Route::post('product/childcategories-attributes', [VendorProductsController::class, 'childcategoriesAndAttributes']);
-    Route::post('product/childcategory-brands', [VendorProductsController::class, 'childcategory_brands']);
-    Route::post('product/image/delete', [VendorProductsController::class, 'deleteProductImage']);
-
-    // ORDERS (PACKAGES)
-    Route::resource('orders', VendorOrdersController::class);
-    Route::get('order/status/{id}', [VendorOrdersController::class, 'ordersByStatus']);
-    Route::post('order/status/listing', [VendorOrdersController::class, 'orderStatusListing']);
-    Route::post('order/status/{id}', [VendorOrdersController::class, 'updateOrderStatus']);
-
-    // NOTIFICATIONS
-    Route::get('notifications/recent', [VendorNotificationsController::class, 'recentNotifications']);
-    Route::get('notifications/all', [VendorNotificationsController::class, 'allNotifications']);
-
-    // COUPONS
-    Route::resource('coupons', VendorCouponsController::class);
-    Route::post('coupon/update-status', [VendorCouponsController::class, 'updateStatus']);
-
-    // VERIFICATION
-    Route::post('{vid}/email/verification', [VendorCategoriesController::class, 'setVerificationToken']);
-    Route::get('{vid}/email/verification', [VendorCategoriesController::class, 'getVerificationToken']);
-    Route::get('{vid}/mobile/verification', [VendorCategoriesController::class, 'mobileVerified']);
-
-    // RATTINGS AND REVIEWS
-    Route::get('reviews', [VendorProductReviewsController::class, 'index']);
-    Route::post('review/reply', [VendorProductReviewsController::class, 'replyReview']);
-    Route::post('review/report', [VendorProductReviewsController::class, 'reportReview']);
-    Route::get('products/{id}/reviews', [VendorProductReviewsController::class, 'productReview']);
-
-
-
-    // QUESTIONS
-    Route::get('questions', [VendorProductQuestionsController::class, 'index']);
-    Route::post('question/reply', [VendorProductQuestionsController::class, 'replyQuestion']);
-    Route::post('question/report', [VendorProductQuestionsController::class, 'reportQuestion']);
-    Route::get('products/{id}/questions', [VendorProductQuestionsController::class, 'productQuestions']);
-
-
-
-//    commission
-    Route::prefix('commissions')->group(function (){
-        Route::get('structure',[VendorCommissionController::class,'commissionStructure']);
-        Route::get('items',[VendorCommissionController::class,'itemsCommissions']);
-    });
-    Route::prefix('inside')->group(function (){
-        Route::get('statistic',[VendorStatisticController::class,'index']);
-    });
-});
 
 
 /*
@@ -555,6 +159,7 @@ Route::group(['prefix' => '/', 'middleware' => []], function () {
     // HEADER/NAVBAR
     Route::get('categories-with-subcategories', [WebNavbarsController::class, 'categoriesWithSubcategories']);
     Route::get('categories/featured', [WebNavbarsController::class, 'featuredCategories']);
+    Route::get('featured/child/categories', [WebNavbarsController::class, 'featuredChildCategories']);
     Route::get('categories/popular', [WebNavbarsController::class, 'popularCategories']);
 
     // HOME-PAGE
@@ -615,7 +220,6 @@ Route::group(['prefix' => 'app/', 'middleware' => []], function () {
 //    App settings
 
 
-
 });
 
 
@@ -673,6 +277,8 @@ Route::group(['prefix' => '/', 'middleware' => ['isBuyer']], function () {
     Route::post('orders', [OrdersController::class, 'placeOrder']);
     Route::get('my-orders', [OrdersController::class, 'myOrders']);
     Route::get('my-order/{id}/detail', [OrdersController::class, 'orderDetail']);
+    Route::post('order/cancel', [OrdersController::class, 'orderCancel']);
+    Route::post('order/package/cancel', [OrdersController::class, 'orderPackageCancel']);
 
     // USER CART
     Route::post('cart-items/add-multiple', [CartItemsController::class, 'addMultipleItems']);
@@ -745,5 +351,11 @@ Route::prefix('/user-store')->group(function () {
     });
 
 });
+
+
+//  product apis for data update local to live
+
+Route::get('product-lists', [\App\Http\Controllers\DataManagementController::class, 'productsList']);
+Route::get('product-detail-images', [\App\Http\Controllers\DataManagementController::class, 'productsDetailImages']);
 
 

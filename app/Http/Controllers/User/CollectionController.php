@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Collection;
 use App\Models\User;
 use App\Models\UserStore;
+use App\Traits\ApiDataGenerate;
 use App\Traits\ApiHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +14,8 @@ use Illuminate\Support\Facades\Validator;
 
 class CollectionController extends Controller
 {
-    use ApiHelper;
-    
+    use ApiHelper,ApiDataGenerate;
+
     /*
     |=================================================================
     | Get Collections Listing of Auth-User's MyStore -- Manage Profile
@@ -60,7 +61,7 @@ class CollectionController extends Controller
 
     /*
     |=================================================================
-    | Show The Form For Creating a New Resource -- 
+    | Show The Form For Creating a New Resource --
     |=================================================================
     */
     public function create()
@@ -72,7 +73,7 @@ class CollectionController extends Controller
 
     /*
     |=================================================================
-    | Store A Newly Created Collection in Database For Auth User -- 
+    | Store A Newly Created Collection in Database For Auth User --
     |=================================================================
     */
     public function store(Request $request)
@@ -100,6 +101,7 @@ class CollectionController extends Controller
 
                 $formdata= [
                     'name'          => $request->name,
+                    'slug'          => $this->createSlug('collections',$request->name),
                     'user_store_id' => $user->user_store->id,
                     'code'          => $code,
                     'visibility'    => $request->visibility
@@ -137,7 +139,7 @@ class CollectionController extends Controller
 
     /*
     |=================================================================
-    | Get Auth-User Specific Collection Details -- 
+    | Get Auth-User Specific Collection Details --
     |=================================================================
     */
     public function show($id)
@@ -145,8 +147,8 @@ class CollectionController extends Controller
         //
     }
 
-    
-    
+
+
     /*
     |=================================================================
     | Store A Newly Created Collection in Database -- Auth User
@@ -157,21 +159,21 @@ class CollectionController extends Controller
         //
     }
 
-    
-    
+
+
     /*
     |=================================================================
-    | Update Specific Collection Details in Database -- Auth User 
+    | Update Specific Collection Details in Database -- Auth User
     |=================================================================
     */
     public function update(Request $request, $id)
-    {   
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'name'       => 'required|max:300',
                 'visibility' => 'required|integer',
             ]);
-    
+
             if($validator->fails()){
                 return response()->json([
                     'status' => 100,
@@ -183,17 +185,17 @@ class CollectionController extends Controller
                 'name'       => $request->name,
                 'visibility' => $request->visibility
             ];
-    
+
             $collection  = Collection::where('id' , $id)->update($formdata);
             $collection  = Collection::where('id' , $id)->first();
-    
+
             return response()->json([
                 'status'  => 200,
                 'message' => "Awesome, Your Collection Is Updated",
                 'collection'=> $collection
             ]);
-            
-        } 
+
+        }
         catch (\Exception $e) {
             return response()->json([
                 "status" => 100,
@@ -203,18 +205,18 @@ class CollectionController extends Controller
         }
     }
 
-    
-    
+
+
     /*
     |=================================================================
-    | Delete Specific Collection From Database -- For Auth User 
+    | Delete Specific Collection From Database -- For Auth User
     |=================================================================
     */
     public function destroy($id)
     {
         try {
             $collection  = Collection::where([
-                                        'id' => $id, 
+                                        'id' => $id,
                                         'user_store_id' => Auth::user()->user_store->id
                                     ])->first();
 
@@ -233,7 +235,7 @@ class CollectionController extends Controller
                 'message' => "Alright! Collection is Removed",
             ]);
 
-        } 
+        }
         catch (\Exception $e) {
             return response()->json([
                 "status" => 100,
@@ -247,7 +249,7 @@ class CollectionController extends Controller
 
     /*
     |=================================================================
-    | Delete Multiple Collections in Database -- For Auth User 
+    | Delete Multiple Collections in Database -- For Auth User
     |=================================================================
     */
     public function deleteMany(Request $request)
@@ -288,10 +290,10 @@ class CollectionController extends Controller
 
     /*
     |=================================================================
-    | Generate a Random String -- 
+    | Generate a Random String --
     |=================================================================
     */
-    function generateRandomString($length = 25) 
+    function generateRandomString($length = 25)
     {
         try {
             $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -304,7 +306,7 @@ class CollectionController extends Controller
 
             return $randomString;
 
-        } 
+        }
         catch (\Exception $e) {
             return response()->json([
                 "status" => 100,
@@ -317,7 +319,7 @@ class CollectionController extends Controller
 
     /*
     |=================================================================
-    | Increment/Decrement Collection Likes -- 
+    | Increment/Decrement Collection Likes --
     |=================================================================
     */
     public function likeCollection( Request $request ,  $store_code , $collection_id )
@@ -340,7 +342,7 @@ class CollectionController extends Controller
                     $collection->likers()->attach(Auth::user()->id);
                     $collection->likes = $collection->likes + 1;
                     $collection->save();
-                    
+
                     return response()->json([
                         'status'  => 200,
                         'message' => 'You liked this collection'
@@ -371,14 +373,14 @@ class CollectionController extends Controller
                 "message"=> 'sorry, something went wrong',
                 "errors" => $e->getMessage()
             ]);
-        } 
+        }
     }
 
 
 
     /*
     |=================================================================
-    | Increment/Decrement Collection Followers -- 
+    | Increment/Decrement Collection Followers --
     |=================================================================
     */
     public function followCollection( Request $request ,  $store_code , $collection_id )
@@ -426,14 +428,14 @@ class CollectionController extends Controller
                 "message"=> 'sorry, something went wrong',
                 "errors" => $e->getMessage()
             ]);
-        }  
+        }
     }
 
 
 
     /*
     |=================================================================
-    | Increment Collection Share Counter -- 
+    | Increment Collection Share Counter --
     |=================================================================
     */
     public function shareCollection($store_code , $collection_id)
@@ -457,14 +459,14 @@ class CollectionController extends Controller
                     'message' => 'Collection Not Found'
                 ]);
             }
-        } 
+        }
         catch (\Exception $e) {
             return response()->json([
                 "status" => 100,
                 "message"=> 'sorry, something went wrong',
                 "errors" => $e->getMessage()
             ]);
-        } 
+        }
     }
 
 

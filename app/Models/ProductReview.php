@@ -26,11 +26,11 @@ class ProductReview extends Model
         'likes_on_reply',
     ];
     
-    protected $hidden = [
-        'created_at',
-        'updated_at',
-        'deleted_at'
-    ];
+    // protected $hidden = [
+    //     'created_at',
+    //     'updated_at',
+    //     'deleted_at'
+    // ];
 
     
     /*

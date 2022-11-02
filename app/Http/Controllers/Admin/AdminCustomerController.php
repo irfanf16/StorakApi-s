@@ -38,7 +38,7 @@ class AdminCustomerController extends Controller
                 'status' => 200,
                 'customers' => $customers
             ]);
-        } catch (\Exception$e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 100,
                 'message' => "something went wrong",
@@ -49,7 +49,7 @@ class AdminCustomerController extends Controller
 
     public function show($id)
     {
-        $customer = User::where(['id' => $id, 'role_id' => 3])->with('addresses.countryDetail', 'addresses.cityDetail', 'addresses.addressType')->first();
+        $customer = User::where(['id' => $id, 'role_id' => 3])->with('addresses.countryDetail', 'addresses.cityDetail', 'addresses.addressType', 'orders', 'productQuestions', 'productReviews')->first();
         $cartItems = CartItem::where('user_id', $id)
             ->with([
                 'productDetail:id,name,name_ar,store_id,primary_image,slug',
@@ -84,6 +84,58 @@ class AdminCustomerController extends Controller
                 'status' => 100,
                 'message' => $e->getMessage(),
 
+            ]);
+        }
+    }
+
+    public function wishlist(Request $request)
+    {
+        try {
+            $wishlistItems = WishlistItem::with('productDetail', 'userDetail:id,name,email,mobile')->whereHas('productDetail')
+                ->when($request->has('from_date') && $request->filled('from_date'), function ($query) use ($request) {
+                    $query->where('created_at', '>=', $request->from_date);
+                })
+                ->when($request->has('from_to') && $request->filled('from_to'), function ($query) use ($request) {
+                    $query->where('created_at', '<=', $request->from_to);
+                })
+                ->latest()
+                ->paginate($request->datatable_length);
+
+                return response()->json([
+                    'status' => 200,
+                    'wishlistItems' => $wishlistItems
+                ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 100,
+                'message' => "something went wrong",
+                'exception' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function cartItems(Request $request)
+    {
+        try {
+            $cartItems = CartItem::with('productDetail', 'userDetail:id,name,email,mobile')->whereHas('productDetail')
+                ->when($request->has('from_date') && $request->filled('from_date'), function ($query) use ($request) {
+                    $query->where('created_at', '>=', $request->from_date);
+                })
+                ->when($request->has('from_to') && $request->filled('from_to'), function ($query) use ($request) {
+                    $query->where('created_at', '<=', $request->from_to);
+                })
+                ->latest()
+                ->paginate($request->datatable_length);
+
+                return response()->json([
+                    'status' => 200,
+                    'cartItems' => $cartItems
+                ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 100,
+                'message' => "something went wrong",
+                'exception' => $e->getMessage(),
             ]);
         }
     }

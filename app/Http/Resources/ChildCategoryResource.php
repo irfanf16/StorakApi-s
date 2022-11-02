@@ -21,7 +21,9 @@ class ChildCategoryResource extends JsonResource
             'image' => $this['image'],
             'title' => $lang == 'ar' ? $this['title_ar'] : $this['title'],
             'keyword' => $lang == 'ar' ? $this['title_ar'] : $this['title'],
-            'model_type' => 'ChildCategory'
+            'model_type' => 'ChildCategory',
+            'products_count'=>$this['products_count'],
+
         ];
     }
 }

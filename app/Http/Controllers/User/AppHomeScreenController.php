@@ -41,8 +41,11 @@ class AppHomeScreenController extends Controller
                 ->inRandomOrder()
                 ->get();
             $categories = CategoryResource::collection($categories);
-            $recommended_products = Product::with('firstVariant:id,price,special_price,product_id')
+            $recommended_products = Product::with('firstVariant')
                 ->with('brand:id,name,name_ar,slug')
+                ->whereHas('firstVariant',function ($query){
+                    $query->where('quantity','>=',1)->where('availability',1);
+                })
                 ->whereRelation('store', 'is_verified', '=', 1)->whereRelation('store', 'status', '=', 1)
                 ->where('status', 1)
                 ->select('id', 'name', 'name_ar', 'slug', 'primary_image', 'brand_id', 'likes', 'views', 'sales', 'reports', 'total_reviews', 'avg_rating')
@@ -50,8 +53,11 @@ class AppHomeScreenController extends Controller
                 ->inRandomOrder()
                 ->get();
             $recommended_products = ProductResource::collection($recommended_products);
-            $sod_products = Product::with('firstVariant:id,price,special_price,product_id')
+            $sod_products = Product::with('firstVariant')
                 ->with('brand:id,name,name_ar,slug')
+                ->whereHas('firstVariant',function ($query){
+                    $query->where('quantity','>=',1)->where('availability',1);
+                })
                 ->select('id', 'name', 'name_ar', 'slug', 'primary_image', 'brand_id', 'likes', 'views', 'sales', 'reports', 'total_reviews', 'avg_rating')
                 ->where([
                     'status' => 1,
@@ -61,8 +67,11 @@ class AppHomeScreenController extends Controller
                 ->take(6)
                 ->get();
             $sod_products = ProductResource::collection($sod_products);
-            $featured_products = Product::with('firstVariant:id,price,special_price,product_id')
+            $featured_products = Product::with('firstVariant')
                 ->with('brand:id,name,name_ar,slug')
+                ->whereHas('firstVariant',function ($query){
+                    $query->where('quantity','>=',1)->where('availability',1);
+                })
                 ->select('id', 'name', 'name_ar', 'slug', 'primary_image', 'brand_id', 'likes', 'views', 'sales', 'reports', 'total_reviews', 'avg_rating')
                 ->where([
                     'status' => 1,
@@ -74,8 +83,11 @@ class AppHomeScreenController extends Controller
                 ->get();
             $featured_products = ProductResource::collection($featured_products);
 
-            $mega_deals = Product::with('firstVariant:id,price,special_price,product_id')
+            $mega_deals = Product::with('firstVariant')
                 ->with('brand:id,name,name_ar,slug')
+                ->whereHas('firstVariant',function ($query){
+                    $query->where('quantity','>=',1)->where('availability',1);
+                })
                 ->where('status', 1)
                 ->whereRelation('store', 'is_verified', '=', 1)->whereRelation('store', 'status', '=', 1)
                 ->select('id', 'name', 'name_ar', 'slug', 'primary_image', 'brand_id', 'likes', 'views', 'sales', 'reports', 'total_reviews', 'avg_rating')
@@ -84,8 +96,11 @@ class AppHomeScreenController extends Controller
                 ->get();
             $mega_deals = ProductResource::collection($mega_deals);
 
-            $top_selling_products = Product::with('firstVariant:id,price,special_price,product_id')
+            $top_selling_products = Product::with('firstVariant')
                 ->with('brand:id,name,name_ar,slug')
+                ->whereHas('firstVariant',function ($query){
+                    $query->where('quantity','>=',1)->where('availability',1);
+                })
                 ->where('status', 1)
                 ->whereRelation('store', 'is_verified', '=', 1)->whereRelation('store', 'status', '=', 1)
                 ->select('id', 'name', 'name_ar', 'slug', 'primary_image', 'brand_id', 'likes', 'views', 'sales', 'reports', 'total_reviews', 'avg_rating')
@@ -204,6 +219,10 @@ class AppHomeScreenController extends Controller
                 ->orderBy('order', 'asc')
                 ->select('id', 'title', 'title_ar', 'slug', 'mobile_image')
                 ->inRandomOrder()
+                ->with(['subcategories' => function ($query) {
+                    $query->withCount('products');
+                }])
+                ->withCount('products')
                 ->get();
 
             $categories = FeatureCategoryResource::collection($categories);

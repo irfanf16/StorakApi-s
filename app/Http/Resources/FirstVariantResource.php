@@ -20,6 +20,7 @@ class FirstVariantResource extends JsonResource
             'special_price'=>$this['special_price'],
             'product_id'=>$this['product_id'],
             'quantity'=>$this['quantity'],
+            'availability'=>$this['availability'],
 
         ];
     }

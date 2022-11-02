@@ -628,20 +628,20 @@ class VendorProductsController extends Controller
 //
         if (str_contains($product->detailed_description,'storage/product/detail')){
             $var1 =  $product->detailed_description;
-            $file_code = str_replace("storage/product/detail/", "", $var1);
+            $file_code = str_replace("storage/product/detail/", " ", $var1);
 
             // STORE PRODUCT DETAIL DESCRIPTION
-            Storage::disk('product')->put("detail/$file_code.json", json_encode([
+            Storage::disk('product')->put("detail/$file_code", json_encode([
                 'content' => $request->detailed_description,
             ]));
 
         }else{
             // STORE PRODUCT DETAIL DESCRIPTION
             $file_code = $this->randomStr(12);
-            Storage::disk('product')->put("detail/$file_code.json", json_encode([
+            $file_code= $file_code.'.json';
+            Storage::disk('product')->put("detail/$file_code", json_encode([
                 'content' => $request->detailed_description,
             ]));
-            $file_code= $file_code.'json';
 //            die($request->detailed_description);
         }
 
@@ -900,44 +900,46 @@ class VendorProductsController extends Controller
 
     public function updateTranslation(Request $request, $id)
     {
+        
         // $product = ($request->all());
         $product = Product::find($id);
 
         if (str_contains($product->detailed_description,'storage/product/detail')){
             $eng =  $product->detailed_description;
-            $arabic =  $product->detailed_description_ar;
             $file_code = str_replace("storage/product/detail/", "", $eng);
-            $file_code_ar = str_replace("storage/product/detail/", "", $arabic);
-
             // STORE PRODUCT DETAIL DESCRIPTION
-            Storage::disk('product')->put("detail/$file_code.json", json_encode([
+            Storage::disk('product')->put("detail/$file_code", json_encode([
                 'content' => $request->detailed_description,
             ]));
-
-            Storage::disk('product')->put("detail/$file_code_ar.json", json_encode([
+        }else{
+            // STORE PRODUCT DETAIL DESCRIPTION
+            $file_code = $this->randomStr(12);
+            $file_code=$file_code.'.json';
+            Storage::disk('product')->put("detail/$file_code", json_encode([
+                'content' => $request->detailed_description,
+            ]));
+        }
+        if (str_contains($product->detailed_description_ar,'storage/product/detail')){
+            $arabic =  $product->detailed_description_ar;
+            $file_code_ar = str_replace("storage/product/detail/", "", $arabic);
+            Storage::disk('product')->put("detail/$file_code_ar", json_encode([
                 'content' => $request->detailed_description_ar,
             ]));
 
         }else{
-            // STORE PRODUCT DETAIL DESCRIPTION
-            $file_code = $this->randomStr(12);
-            Storage::disk('product')->put("detail/$file_code.json", json_encode([
-                'content' => $request->detailed_description,
-            ]));
-
             $file_code_ar = $this->randomStr(12);
-            Storage::disk('product')->put("detail/$file_code_ar.json", json_encode([
+            $file_code_ar=$file_code_ar.'.json';
+            Storage::disk('product')->put("detail/$file_code_ar", json_encode([
                 'content' => $request->detailed_description_ar,
             ]));
-//            die($request->detailed_description);
         }
         $product->update([
             'name' => $request->name,
             'name_ar' => $request->name_ar,
             'short_description' => $request->short_description,
             'short_description_ar' => $request->short_description_ar,
-            'detailed_description' => "storage/product/detail/$file_code.json",
-            'detailed_description_ar' => "storage/product/detail/$file_code_ar.json",
+            'detailed_description' => "storage/product/detail/".$file_code,
+            'detailed_description_ar' => "storage/product/detail/".$file_code_ar,
             'translation_verified' => $request->translation_verified ? 1 : 0
         ]);
 
@@ -969,6 +971,4 @@ class VendorProductsController extends Controller
             ]);
         }
     }
-
-
 }

@@ -18,6 +18,9 @@ class SubRole extends Model
     public function users(){
         return $this->belongsToMany(User::class , 'subrole_user'  , 'subrole_id'  );
     }
+    public function permissions(){
+        return $this->belongsToMany(Permission::class,'subrole_permissions','subrole_id','permission_id','id')->select('slug');
+    }
 
 
 }

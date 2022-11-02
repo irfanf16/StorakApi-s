@@ -15,10 +15,10 @@ class WishlistItem extends Model
         'product_variant_id',
     ];
     
-    protected $hidden = [
-        'created_at',
-        'updated_at',
-    ];
+    // protected $hidden = [
+    //     'created_at',
+    //     'updated_at',
+    // ];
 
 
     /*

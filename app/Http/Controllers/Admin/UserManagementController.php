@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Vendor;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
@@ -20,7 +20,7 @@ class UserManagementController extends Controller
     {
 
 
-        $admin = User::where('id', Auth::user()->id)->with('store')->first();
+//        $admin = User::where('id', Auth::user()->id)->with('store')->first();
         // return ($admin);
 
         $validator = Validator::make($request->all(), [
@@ -38,7 +38,7 @@ class UserManagementController extends Controller
         }
 
         $user = new User();
-        $user->role_id = 2; // VENDOR
+        $user->role_id = 1; // VENDOR
         $user->name = $request->name;
         $user->email = $request->email;
         $user->mobile = $request->mobile;
@@ -47,15 +47,10 @@ class UserManagementController extends Controller
         $user->vendor_profile_status = 0;
         // $user->email_confirmation_code= $request->confirmation_code;
 
-        $is_user_created = $user->save();
+        $user->save();
 
-        $store = Store::where('id', $admin->store->id)->first();
         $role = SubRole::find($request->subrole_id);
-        $store->user()->attach($user->id);
         $role->users()->attach($user->id);
-
-        $user->load('store');
-
         return response()->json([
             "status" => 200,
             "user" => $user
@@ -131,11 +126,8 @@ class UserManagementController extends Controller
     public function listUser()
     {
 
-        $admin = User::where('id', Auth::user()->id)->with('store', 'store.user')->first();
-        $store = $admin->store;
-        $userids = $store->user->where('id', '!=', Auth::user()->id)->pluck('id');
 
-        $users = User::whereIn('id', $userids)->with('Subrole')->get();
+        $users = User::where('role_id', 1)->where('id', '>', 1)->with('Subrole')->get();
 
         return response()->json([
             "status" => 200,
@@ -161,7 +153,7 @@ class UserManagementController extends Controller
 
         $subrole = SubRole::create([
             "name" => $request->name,
-            "owner_id" => Auth::user()->store()->first()->id
+            "owner_id" => 0
         ]);
         $subrole->permissions()->sync($request->permissions);
 
@@ -206,10 +198,10 @@ class UserManagementController extends Controller
     public function listSubrole()
     {
 
-        $subroles = SubRole::where('owner_id', Auth::user()->store()->first()->id)->get();
+        $subroles = SubRole::where('owner_id', 0)->where('name', '!=', 'Storak Admin')->where('name', '!=', 'Vendor Admin')->get();
 //        $modules = config('modules-beta.vendor');
 //        $blank = config('modules-blank.vendor');
-        $permissions = Permission::where('permission_type', 'vendor')->get();
+        $permissions = Permission::where('permission_type', 'admin')->get();
         return response()->json([
             "status" => 200,
             "subroles" => $subroles,
@@ -222,7 +214,7 @@ class UserManagementController extends Controller
     {
 
         $subrole = SubRole::find($id);
-        $permissions = Permission::where('permission_type', 'vendor')->get();
+        $permissions = Permission::where('permission_type', 'admin')->get();
         $rolePermissions = DB::table("subrole_permissions")->where("subrole_permissions.subrole_id", $id)
             ->pluck('subrole_permissions.permission_id')
             ->all();

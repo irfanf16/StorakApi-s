@@ -18,6 +18,7 @@ class SearchChildCategoryResource extends JsonResource
         return [
             'id' => $this['id'],
             'slug' => $this['slug'],
+            'image' => $this['image'],
             'title' => $lang == 'ar' ? $this['title_ar'] : $this['title'],
             'keyword' => $lang == 'ar' ? $this['title_ar'] : $this['title'],
             'model_type' => 'ChildCategory',

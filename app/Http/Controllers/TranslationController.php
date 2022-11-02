@@ -192,58 +192,58 @@ class TranslationController extends Controller
 
     public function slugs()
     {
-        ini_set('max_execution_time', '600'); //300 seconds = 5 minutes
-        DB::table('categories')->update(array('slug' => null));
-        $categories = Category::withTrashed()->get();
-        foreach ($categories as $category) {
-            $slug = $this->createSlug('categories',$category->title);
-            $category->slug = $slug;
-            $category->save();
-        }
-        DB::table('sub_categories')->update(array('slug' => null));
-        $subcategories = SubCategory::all();
-        foreach ($subcategories as $category) {
-            $slug = $this->createSlug('sub_categories',$category->title);
-            $category->slug = $slug;
-            $category->save();
-        }
-        DB::table('child_categories')->update(array('slug' => null));
-        $childCategories = ChildCategory::all();
-        foreach ($childCategories as $category) {
-            $slug = $this->createSlug('child_categories',$category->title);
-            $category->slug = $slug;
-            $category->save();
-        }
-        DB::table('brands')->update(array('slug' => null));
-        $brands = Brand::all();
-        foreach ($brands as $brand) {
-            $slug = $this->createSlug('brands',$brand->name);
-            $brand->slug = $slug;
-            $brand->save();
-        }
-        DB::table('stores')->update(array('slug' => null));
-
-        $stores = Store::all();
-        foreach ($stores as $store) {
-            $slug = $this->createSlug('stores',$store->store_name);
-            $store->slug = $slug;
-            $store->save();
-        }
-        DB::table('user_stores')->update(array('slug' => null));
-        $user_stores = UserStore::all();
-        foreach ($user_stores as $store) {
-            $slug = $this->createSlug('user_stores',$store->name);
-            $store->slug = $slug;
-
-            $store->save();
-        }
-        DB::table('attributes')->update(array('slug' => null));
-        $attributes = Attribute::all();
-        foreach ($attributes as $attribute) {
-            $slug = $this->createSlug('attributes',$attribute->title);
-            $attribute->slug = $slug;
-            $attribute->save();
-        }
+//        ini_set('max_execution_time', '600'); //300 seconds = 5 minutes
+//        DB::table('categories')->update(array('slug' => null));
+//        $categories = Category::withTrashed()->get();
+//        foreach ($categories as $category) {
+//            $slug = $this->createSlug('categories',$category->title);
+//            $category->slug = $slug;
+//            $category->save();
+//        }
+//        DB::table('sub_categories')->update(array('slug' => null));
+//        $subcategories = SubCategory::all();
+//        foreach ($subcategories as $category) {
+//            $slug = $this->createSlug('sub_categories',$category->title);
+//            $category->slug = $slug;
+//            $category->save();
+//        }
+//        DB::table('child_categories')->update(array('slug' => null));
+//        $childCategories = ChildCategory::all();
+//        foreach ($childCategories as $category) {
+//            $slug = $this->createSlug('child_categories',$category->title);
+//            $category->slug = $slug;
+//            $category->save();
+//        }
+//        DB::table('brands')->update(array('slug' => null));
+//        $brands = Brand::all();
+//        foreach ($brands as $brand) {
+//            $slug = $this->createSlug('brands',$brand->name);
+//            $brand->slug = $slug;
+//            $brand->save();
+//        }
+//        DB::table('stores')->update(array('slug' => null));
+//
+//        $stores = Store::all();
+//        foreach ($stores as $store) {
+//            $slug = $this->createSlug('stores',$store->store_name);
+//            $store->slug = $slug;
+//            $store->save();
+//        }
+//        DB::table('user_stores')->update(array('slug' => null));
+//        $user_stores = UserStore::all();
+//        foreach ($user_stores as $store) {
+//            $slug = $this->createSlug('user_stores',$store->name);
+//            $store->slug = $slug;
+//
+//            $store->save();
+//        }
+//        DB::table('attributes')->update(array('slug' => null));
+//        $attributes = Attribute::all();
+//        foreach ($attributes as $attribute) {
+//            $slug = $this->createSlug('attributes',$attribute->title);
+//            $attribute->slug = $slug;
+//            $attribute->save();
+//        }
         DB::table('collections')->update(array('slug' => null));
         $collections = Collection::all();
         foreach ($collections as $collection) {
@@ -252,19 +252,31 @@ class TranslationController extends Controller
             $collection->save();
         }
 
+//        DB::table('products')->update(array('slug' => null));
+//        $products = Product::all();
+//        foreach ($products as $product) {
+//           $product->slug=$this->createSlug('products',$product->name);
+//            $product->save();
+//        }
+//        DB::table('keys')->update(array('slug' => null));
+//        $keys = Key::all();
+//        foreach ($keys as $key) {
+//            $key->slug = $this->createSlug('keys',$key->name);
+//            $key->save();
+//        }
+        dd('slugs generated successfully');
+    }
+
+    public function slugsProducts(){
+
         DB::table('products')->update(array('slug' => null));
         $products = Product::all();
         foreach ($products as $product) {
-           $product->slug=$this->createSlug('products',$product->name);
+            $product->slug=$this->createSlug('products',$product->name);
             $product->save();
         }
-        DB::table('keys')->update(array('slug' => null));
-        $keys = Key::all();
-        foreach ($keys as $key) {
-            $key->slug = $this->createSlug('keys',$key->name);
-            $key->save();
-        }
         dd('slugs generated successfully');
+
     }
 
 //    translation

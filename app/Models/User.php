@@ -49,7 +49,6 @@ class User extends Authenticatable implements JWTSubject
     ];
 
 
-
     /*
     |========================================================================
     | Get the identifier that will be stored in the subject claim of the JWT.
@@ -104,8 +103,9 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(BusinessInformation::class)->with('city:id,name');
     }
 
-    public function ActivityLog(){
-        return $this->hasMany(ActivityLog::class , 'user_id');
+    public function ActivityLog()
+    {
+        return $this->hasMany(ActivityLog::class, 'user_id');
     }
 
 
@@ -116,12 +116,13 @@ class User extends Authenticatable implements JWTSubject
     */
     public function store()
     {
-        return $this->hasOneThrough( Store::class,  StoreUser::class , 'user_id' , 'id' , 'id' , 'store_id');
+        return $this->hasOneThrough(Store::class, StoreUser::class, 'user_id', 'id', 'id', 'store_id');
     }
 
 
-    public function stores(){
-        $withDetail = $this->belongsToMany(Store::class , 'store_user' )->wherePivot('active', 'true');
+    public function stores()
+    {
+        $withDetail = $this->belongsToMany(Store::class, 'store_user')->wherePivot('active', 'true');
         return $withDetail;
     }
 
@@ -148,7 +149,6 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
-
     /*
     |===========================================================
     | Get Orders Listing of that Buyer
@@ -160,7 +160,6 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
-
     /*
     |===========================================================
     | Get Auth-User Liked Products Listing
@@ -170,7 +169,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ProductLike::class);
     }
-
 
 
     /*
@@ -191,7 +189,6 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
-
     /*
     |============================================================
     | Get the Subrole of That User
@@ -200,12 +197,17 @@ class User extends Authenticatable implements JWTSubject
     public function Subrole()
     {
         return $this->hasOneThrough(
-            SubRole::class ,
-            subrole_user::class ,
-            'user_id' ,
-            'id' ,
-            'id' ,
+            SubRole::class,
+            subrole_user::class,
+            'user_id',
+            'id',
+            'id',
             'subrole_id');
+    }
+
+    public function role()
+    {
+        return $this->belongsToMany(SubRole::class, 'subrole_user', 'user_id', 'subrole_id', 'id');
     }
 
 
@@ -222,7 +224,17 @@ class User extends Authenticatable implements JWTSubject
 
     public function user_stores()
     {
-        return $this->hasMany(UserStore::class,'user_id','id');
+        return $this->hasMany(UserStore::class, 'user_id', 'id');
+    }
+
+    public function productQuestions()
+    {
+        return $this->hasMany(ProductQuestion::class, 'user_id', 'id');
+    }
+
+    public function productReviews()
+    {
+        return $this->hasMany(ProductReview::class, 'user_id', 'id');
     }
 
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\ChildCategoryResource;
 use App\Http\Resources\FeatureCategoryResource;
+use App\Http\Resources\FeaturedChildCategoryResource;
 use App\Http\Resources\MatchingFiltersResource;
 use Illuminate\Http\Request;
 
@@ -23,26 +25,32 @@ class WebNavbarsController extends Controller
     public function categoriesWithSubcategories()
     {
         try {
-            $categories = Category::with('subcategories.childcategories')
-                                    ->where('status',1)
-                                    ->select('id','title','title_ar','slug')
-                                    ->orderBy('order','asc')
-                                    ->get();
+            $categories = Category:: with('subcategories.childcategories')
+                ->where('status', 1)
+                ->select('id', 'title', 'title_ar', 'slug', 'logo_image', 'banner_image', 'mobile_image')
+                ->orderBy('order', 'asc')
+                ->with(['subcategories.childcategories' => function ($query) {
+                    $query->withCount('products');
+                }])
+                ->with(['subcategories' => function ($query) {
+                    $query->withCount('products');
+                }])
+                ->withCount('products')
+                ->get();
 
-            $categories=MatchingFiltersResource::collection($categories);
+            $categories = MatchingFiltersResource::collection($categories);
             return response()->json([
-                'status'     => 200,
+                'status' => 200,
                 'categories' => $categories,
             ]);
 
-        }
-        catch (\Throwable $th) {
+        } catch (\Throwable $th) {
 
             // throw $th;
             return response()->json([
-                "status"    => 100,
-                "message"   => "Sorry! Something Went Wrong.",
-                "exceptions"=> $th
+                "status" => 100,
+                "message" => "Sorry! Something Went Wrong.",
+                "exceptions" => $th
             ]);
         }
     }
@@ -56,33 +64,68 @@ class WebNavbarsController extends Controller
     public function featuredCategories()
     {
         try {
-            $fcategories = Category::with('subcategories')
-                                ->where([
-                                  'status'  => 1,
-                                  'featured'=> 1
-                                ])
-                                ->select('id','title','title_ar','slug','logo_image')
-                                ->orderBy('order','asc')
-                                ->get();
+            $fcategories = Category::with(['subcategories' => function ($query) {
+                $query->withCount('products');
 
-            $fcategories=FeatureCategoryResource::collection($fcategories);
+            }])
+                ->where([
+                    'status' => 1,
+                    'featured' => 1
+                ])
+                ->select('id', 'title', 'title_ar', 'slug', 'logo_image')
+                ->orderBy('order', 'asc')
+                ->withCount('products')
+                ->get();
+
+            $fcategories = FeatureCategoryResource::collection($fcategories);
             return response()->json([
-                'status'      => 200,
+                'status' => 200,
                 'fCategories' => $fcategories,
             ]);
 
-        }
-        catch (\Throwable $th) {
+        } catch (\Throwable $th) {
 
             // throw $th;
             return response()->json([
-                "status"    => 100,
-                "message"   => "Sorry! Something Went Wrong.",
-                "exceptions"=> $th
+                "status" => 100,
+                "message" => "Sorry! Something Went Wrong.",
+                "exceptions" => $th
             ]);
         }
     }
 
+    public function featuredChildCategories()
+    {
+        try {
+
+            $childcategory = ChildCategory:: where([
+                'status' => 1,
+                'featured' => 1
+            ])
+                ->with(['category' => function ($query) {
+                    $query->withCount('products');
+                }, 'subcategory' => function ($query) {
+                    $query->withCount('products');
+                }])
+                ->withCount('products')
+                ->get();
+
+            $childcategory = FeaturedChildCategoryResource::collection($childcategory);
+            return response()->json([
+                'status' => 200,
+                'child_categories' => $childcategory,
+            ]);
+
+        } catch (\Throwable $th) {
+
+            // throw $th;
+            return response()->json([
+                "status" => 100,
+                "message" => "Sorry! Something Went Wrong.",
+                "exceptions" => $th
+            ]);
+        }
+        }
 
 
     /*
@@ -94,26 +137,25 @@ class WebNavbarsController extends Controller
     {
         try {
             $pcategories = Category::where([
-                                    'status'  => 1,
-                                    'popular' => 1
-                                ])
-                                ->select('id','title','title_ar','slug','logo_image')
-                                ->get();
+                'status' => 1,
+                'popular' => 1
+            ])
+                ->select('id', 'title', 'title_ar', 'slug', 'logo_image')
+                ->get();
 
-            $pcategories=CategoryResource::collection($pcategories);
+            $pcategories = CategoryResource::collection($pcategories);
             return response()->json([
-                'status'      => 200,
+                'status' => 200,
                 'pcategories' => $pcategories,
             ]);
 
-        }
-        catch (\Throwable $th) {
+        } catch (\Throwable $th) {
 
             // throw $th;
             return response()->json([
-                "status"    => 100,
-                "message"   => "Sorry! Something Went Wrong.",
-                "exceptions"=> $th
+                "status" => 100,
+                "message" => "Sorry! Something Went Wrong.",
+                "exceptions" => $th
             ]);
         }
     }

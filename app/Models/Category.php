@@ -73,7 +73,7 @@ class Category extends Model
     {
         return $this->hasMany(ChildCategory::class, 'category_id', 'id')
                     ->where('status',1)
-                    ->select('id','slug','title','title_ar','category_id');
+                    ->select('id','slug','title','title_ar','category_id','image');
     }
 
 

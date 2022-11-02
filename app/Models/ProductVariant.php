@@ -21,11 +21,11 @@ class ProductVariant extends Model
         'image'
     ];
 
-    protected $hidden = [
-        'created_at',
-        'updated_at',
-        'deleted_at'
-    ];
+//    protected $hidden = [
+//        'created_at',
+//        'updated_at',
+//        'deleted_at'
+//    ];
 
 
     /*
@@ -48,6 +48,17 @@ class ProductVariant extends Model
     {
         return $this->hasMany(VariantAttribute::class, 'product_variant_id', 'id');
     }
+
+    /*
+    |========================================================
+    | Get the Attributes Listing of that Product-Variant
+    |========================================================
+    */
+    public function attributeDetail()
+    {
+        return $this->hasMany(VariantAttribute::class, 'product_variant_id', 'id');
+    }
+
 
 
 

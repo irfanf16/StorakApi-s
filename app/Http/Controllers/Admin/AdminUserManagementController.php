@@ -1,32 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Vendor;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Permission;
-use App\Models\Store;
-use App\Models\SubRole;
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\SubRole;
 
-class UserManagementController extends Controller
+class AdminUserManagementController extends Controller
 {
-    //
-
     public function createUser(Request $request)
     {
-
-
-        $admin = User::where('id', Auth::user()->id)->with('store')->first();
-        // return ($admin);
-
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
-            'mobile' => 'string|min:8|max:11',
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email|unique:users,email',
+            'mobile'   => 'string|min:8|max:11',
             'password' => 'required|min:8',
 
         ]);
@@ -37,24 +27,17 @@ class UserManagementController extends Controller
             ]);
         }
 
-        $user = new User();
-        $user->role_id = 2; // VENDOR
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->mobile = $request->mobile;
-        $user->password = bcrypt($request->password);
-        $user->registered_with = "signup";
-        $user->vendor_profile_status = 0;
+        $user                         = new User();
+        $user->role_id                = 2; // VENDOR
+        $user->name                   = $request->name;
+        $user->email                  = $request->email;
+        $user->mobile                 = $request->mobile;
+        $user->password               = bcrypt($request->password);
+        $user->registered_with        = "signup";
+        $user->vendor_profile_status  = 0;
         // $user->email_confirmation_code= $request->confirmation_code;
 
-        $is_user_created = $user->save();
-
-        $store = Store::where('id', $admin->store->id)->first();
-        $role = SubRole::find($request->subrole_id);
-        $store->user()->attach($user->id);
-        $role->users()->attach($user->id);
-
-        $user->load('store');
+        $is_user_created              = $user->save();
 
         return response()->json([
             "status" => 200,
@@ -62,17 +45,12 @@ class UserManagementController extends Controller
         ]);
     }
 
-
     public function updateUser(Request $request, $id)
     {
-
-        $admin = User::where('id', Auth::user()->id)->with('store')->first();
-        // return ($admin);
-
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'email' => 'required|email',
-            'mobile' => 'string|min:8|max:11',
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email',
+            'mobile'   => 'string|min:8|max:11',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -81,18 +59,16 @@ class UserManagementController extends Controller
             ]);
         }
 
-        $user = User::where('id', $id)->first();
+        $user =  User::where('id', $id)->first();
 
         if ($user) {
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->mobile = $request->mobile;
+            $user->name                   = $request->name;
+            $user->email                  = $request->email;
+            $user->mobile                 = $request->mobile;
             if ($request->password) {
-                $user->password = bcrypt($request->password);
+                $user->password               = bcrypt($request->password);
             }
-            $is_user_created = $user->save();
-
-            $user->load('store');
+            $is_user_created              = $user->save();
 
             return response()->json([
                 "status" => 200,
@@ -127,7 +103,6 @@ class UserManagementController extends Controller
         }
     }
 
-    // list users of this store vendor
     public function listUser()
     {
 
@@ -145,10 +120,7 @@ class UserManagementController extends Controller
 
     public function createSubrole(Request $request)
     {
-
-        // dd(SubRole::all());
-
-        $validator = Validator::make($request->all(), [
+        $validator =  Validator::make($request->all(), [
             "name" => "required|string|max:100"
         ]);
 
@@ -161,9 +133,8 @@ class UserManagementController extends Controller
 
         $subrole = SubRole::create([
             "name" => $request->name,
-            "owner_id" => Auth::user()->store()->first()->id
+            "owner_id" => 0
         ]);
-        $subrole->permissions()->sync($request->permissions);
 
         return response()->json([
             "status" => 200,
@@ -172,13 +143,12 @@ class UserManagementController extends Controller
         ]);
     }
 
-
     public function updateSubrole(Request $request, $id)
     {
 
         // dd(SubRole::all());
 
-        $validator = Validator::make($request->all(), [
+        $validator =  Validator::make($request->all(), [
             "name" => "required|string|max:100"
         ]);
 
@@ -192,7 +162,6 @@ class UserManagementController extends Controller
         $subrole = SubRole::where('id', $id)->first();
         $subrole->name = $request->name;
         $subrole->save();
-        $subrole->permissions()->sync($request->permissions);
 
 
         return response()->json([
@@ -202,39 +171,30 @@ class UserManagementController extends Controller
         ]);
     }
 
-    // list Subroles of this store vendor
     public function listSubrole()
     {
 
-        $subroles = SubRole::where('owner_id', Auth::user()->store()->first()->id)->get();
-//        $modules = config('modules-beta.vendor');
-//        $blank = config('modules-blank.vendor');
-        $permissions = Permission::where('permission_type', 'vendor')->get();
+        $subroles = SubRole::where('owner_id', 0)->get();
+        $modules = config('modules-beta.admin');
+        $blank = config('modules-blank.admin');
         return response()->json([
             "status" => 200,
             "subroles" => $subroles,
-            'permissions' => $permissions,
+            'modules' => $modules,
+            'blank' => $blank
         ]);
     }
 
-    // find Subrole of this store vendor
     public function findSubrole($id)
     {
 
-        $subrole = SubRole::find($id);
-        $permissions = Permission::where('permission_type', 'vendor')->get();
-        $rolePermissions = DB::table("subrole_permissions")->where("subrole_permissions.subrole_id", $id)
-            ->pluck('subrole_permissions.permission_id')
-            ->all();
+        $subrole = SubRole::where(['owner_id' => 0, 'id' => $id])->first();
+
         return response()->json([
             "status" => 200,
-            "subrole" => $subrole,
-            'permissions' => $permissions,
-            'rolePermissions' => $rolePermissions,
-
+            "subrole" => $subrole
         ]);
     }
-
 
     public function listModules()
     {
@@ -244,14 +204,13 @@ class UserManagementController extends Controller
             "status" => 200,
             "modules" => $modules,
             'blank' => $blank
-        ]);
+        ]); 
     }
-
 
     public function createSubrolePermissions(Request $request)
     {
         // dd($request->all());
-        $permissions = json_encode($request->permissions);
+        $permissions  = json_encode($request->permissions);
         $subrole_id = $request->subrole_id;
 
         $subrole = SubRole::where('id', $subrole_id)->first();
@@ -264,48 +223,12 @@ class UserManagementController extends Controller
             "permissions" => json_decode($permissions)
         ]);
 
-
-        // $module  = "products.add_products";
-        // $opration = "create";
-
-        // $module  = explode("." , $module);
-        // // dd($module);
-
-        // foreach($module as $m){
-        //     if(isset($permissions[$m])){
-
-        //         $permissions = $permissions[$m];
-        //     }
-        //     else{
-        //         return "Module ($m) does not exist";
-        //     }
-
-        // }
-
-        // $module = $permissions;
-
-        // if(isset($module)){
-
-        //     if(in_array($opration , $module['oprations'])){
-        //         return true;
-        //     }
-        //     else{
-
-        //         return false;
-        //     }
-        // }else{
-        //     return "Module does not exit";
-        // }
-
-
     }
-
-
+    
     public function assignSubrole(Request $request)
     {
-        // return($request->all());
 
-        $validator = Validator::make($request->all(), [
+        $validator =  Validator::make($request->all(), [
             "user_id" => "required",
             "subrole_id" => "required",
 
@@ -356,4 +279,5 @@ class UserManagementController extends Controller
             ]);
         }
     }
+    
 }

@@ -55,12 +55,15 @@ Route::get('/register', function () {
 
 // data uploaded
 Route::get('/bulk-upload/products/default', [ProductsBulkUploadController::class, 'defaultVariantForm']);
-Route::post('/bulk-upload/products/default', [ProductsBulkUploadController::class, 'bulkUploadWithDefaultVariant']);
+Route::post('/bulk-upload/products/default', [ProductsBulkUploadController::class, 'bulkUploadWithDefaultVariant'])->name('bulk-upload');
 Route::get('/bulk-upload/products/detailed', [ProductsBulkUploadController::class, 'detailedProductsForm']);
 Route::post('/bulk-upload/products/detailed', [ProductsBulkUploadController::class, 'productDetailImages']);
+Route::get('/products/variant/price/update', [ProductsBulkUploadController::class, 'productsVariantPricesForm']);
+Route::post('/products/variant/price/update', [ProductsBulkUploadController::class, 'productsVariantPricesUpdate'])->name('stock_update');
 
 
 Route::get('slugs',[\App\Http\Controllers\TranslationController::class,'slugs']);
+Route::get('slugs/products',[\App\Http\Controllers\TranslationController::class,'slugsProducts']);
 
 // translations arbic
 
@@ -76,5 +79,11 @@ Route::get('translation/collections',[\App\Http\Controllers\TranslationControlle
 
 
 //export products in excel file for google and facebook purpose
+
 Route::get('products/export/facebook',[\App\Http\Controllers\ExportProductsController::class,'exportProductsFacebook']);
 Route::get('products/export/google',[\App\Http\Controllers\ExportProductsController::class,'exportProductsGoogle']);
+
+// product data update on live via localhost
+
+Route::get('products/data/update',[\App\Http\Controllers\DataManagementController::class,'updateProductRecords']);
+Route::get('products/images',[\App\Http\Controllers\DataManagementController::class,'updateProductsDetailImages']);

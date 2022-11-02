@@ -119,6 +119,7 @@ class ProductVariants extends JsonResource
             'price' => $this['price'],
             'special_price' => $this['special_price'],
             'quantity' => $this['quantity'],
+            'availability' => $this['availability'],
             'seller_sku' => $this['seller_sku'],
             'image' => $this['image'],
             'variant_attributes' => ProductVariantAttributes::collection($this['variantAttributes']),

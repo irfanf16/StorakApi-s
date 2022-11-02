@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Validator;
@@ -81,23 +82,20 @@ class JwtAuthController extends Controller
         }
         $notifications_count = Notification::where('store_id', Auth::user()->store->id ?? 0)->count();
 
-
-        $user = Auth::user();
-        // return response()->json($user);
-        if ($user->role_id == 1) {
-
-        } elseif ($user->role_id == 2) {
-            $user = User::where('email', $request->email)->with('Subrole')->first();
-            $subrole = SubRole::where('id', 2)->first();
-            if (StoreController::isOwner($user->id)) {
-                if (!$user->subrole) {
-
-                    $subrole->users()->attach($user->id);
-                }
-
-            }
-        }
-
+//        $user = Auth::user();
+//        // return response()->json($user);
+//        if ($user->role_id == 1) {
+//
+//        } elseif ($user->role_id == 2) {
+//            $user = User::where('email', $request->email)->with('Subrole')->first();
+//            $subrole = SubRole::where('id', 2)->first();
+//            if (StoreController::isOwner($user->id)) {
+//                if (!$user->subrole) {
+//                    $subrole->users()->attach($user->id);
+//                }
+//
+//            }
+//        }
 
         return $this->respondWithToken($token, $notifications_count);
 
@@ -545,6 +543,7 @@ class JwtAuthController extends Controller
     {
         $user_addresses = UserAddress::where('user_id', Auth::id())->get();
         $user = User::with('store','user_store')->where('id', Auth::user()->id)->with('Subrole')->first();
+        $user_role_permissions = User::with('role.permissions')->find(Auth::id());
         // if($user->subrole == null){
         //     $user['subrole'] = ['hell'];
         // }
@@ -556,6 +555,7 @@ class JwtAuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 60,
             // 'expires_in' => config('ttl'), // CUSTOMIZATION OF TOKEN-EXPIRE-TIME
             'user' => $user,
+            'user_role_permissions' => $user_role_permissions->role,
             'store' => $user->store,
             'user_store' =>$user->user_store ? true : false,
             'user_addresses' => $user_addresses,
